@@ -1,0 +1,15 @@
+<Configuration status="WARN">
+    <Appenders>
+        <ConsoleAppender name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n"/>
+        </ConsoleAppender>
+    </Appenders>
+    <Loggers>
+        <Logger name="serviceLogs.org.example.service.ItemServiceImpl" level="DEBUG">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <Root level="DEBUG">
+            <AppenderRef ref="Console"/>
+        </Root>
+    </Loggers>
+</Configuration>

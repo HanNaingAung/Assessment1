@@ -20,27 +20,8 @@ import java.util.Optional;
 @RequestMapping("/api/promotions")
 public class PromotionController {
 
-//    @Autowired
-//    private PromotionService promotionService;
-
     @Autowired
     private MessagingTemplate messagingTemplate;
-
-//    @Autowired
-//    private MessageChannel getAllPromotionsChannel;
-   /* @Autowired
-    private MessageChannel getPromotionChannel;
-
-    @Autowired
-    private MessageChannel getPromotionByIdChannel;
-    @Autowired
-    private MessageChannel postPromotionChannel;
-    @Autowired
-    private MessageChannel putPromotionChannel;
-    @Autowired
-    private MessageChannel deletePromotionChannel;
-    @Autowired
-    private MessageChannel getPromotionByStoreIdChannel;*/
 
     @Autowired
     private MessageChannel replyChannel;
@@ -49,76 +30,6 @@ public class PromotionController {
     private MessageChannel promoChannel;
 
 
-
-   /* @GetMapping
-    public ResponseEntity<?> getAllPromotions() {
-        Message<String> message = MessageBuilder.withPayload("").build();
-        messagingTemplate.setDefaultDestination(replyChannel);
-        messagingTemplate.send(getPromotionChannel, message);
-        Message<?> reply = messagingTemplate.receive();
-        return ResponseEntity.ok( reply.getPayload());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<Object> getPromotionById(@PathVariable Long id) {
-        Message<Long> message = MessageBuilder.withPayload(id).build();
-        messagingTemplate.setDefaultDestination(replyChannel);
-        messagingTemplate.send(getPromotionByIdChannel, message);
-        Message<?> reply = messagingTemplate.receive();
-        Object payload = reply.getPayload();
-        if (Optional.empty() == payload || (payload instanceof String && ((String) payload).isEmpty())) {
-            throw new ResourceNotFoundException("Promotion not found for id ::: " + id);
-        }
-        return ResponseEntity.ok( reply.getPayload());
-    }
-
-    @GetMapping("/store/{storeId}")
-    public ResponseEntity<Object> getPromotionByStoreId(@PathVariable Long storeId) {
-        Message<Long> message = MessageBuilder.withPayload(storeId).build();
-        messagingTemplate.setDefaultDestination(replyChannel);
-        messagingTemplate.send(getPromotionByStoreIdChannel, message);
-        Message<?> reply = messagingTemplate.receive();
-        Object payload = reply.getPayload();
-        if (Optional.empty() == payload || (payload instanceof String && ((String) payload).isEmpty())) {
-            throw new ResourceNotFoundException("Promotion not found for id ::: " + storeId);
-        }
-        return ResponseEntity.ok( reply.getPayload());
-    }
-
-    @PostMapping
-    public ResponseEntity<Object> createPromotion(@RequestBody Promotion Promotion) {
-        Message<Promotion> message = MessageBuilder.withPayload(Promotion).build();
-        messagingTemplate.setDefaultDestination(replyChannel);
-        messagingTemplate.send(postPromotionChannel, message);
-        Message<?> reply = messagingTemplate.receive();
-        return ResponseEntity.ok( reply.getPayload());
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updatePromotion(@PathVariable Long id, @RequestBody Promotion promotion) {
-        UpdatePromoPayload updatePromotionPayload = new UpdatePromoPayload(id,promotion);
-        Message<UpdatePromoPayload> message = MessageBuilder.withPayload(updatePromotionPayload).build();
-        messagingTemplate.setDefaultDestination(replyChannel);
-        messagingTemplate.send(putPromotionChannel, message);
-        Message<?> reply = messagingTemplate.receive();
-        Object payload = reply.getPayload();
-        if (Optional.empty() == payload || payload == null ) {
-            throw new ResourceNotFoundException("Promotion not found for id ::: " + id);
-        }
-        return ResponseEntity.ok( payload);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletePromotion(@PathVariable String id) {
-        Message<String> message = MessageBuilder.withPayload(id).build();
-        messagingTemplate.setDefaultDestination(replyChannel);
-        messagingTemplate.send(deletePromotionChannel, message);
-        Message<?> reply = messagingTemplate.receive();
-        return ResponseEntity.ok( reply.getPayload());
-    }*/
-
-
-    //=========================== Test ========================================//
       @GetMapping
     public ResponseEntity<?> getAllPromotions() {
         PayloadWrapper payload = new PayloadWrapper("GET", null,null);

@@ -26,119 +26,11 @@ public class ItemIntegrationConfig {
     @Autowired
     private ItemService itemService;
 
-    /*@Bean
-    public MessageChannel getItemChannel() {
-        return MessageChannels.direct().get();
-    }
-    @Bean
-    public MessageChannel getItemByIdChannel() {
-        return MessageChannels.direct().get();
-    }
-    @Bean
-    public MessageChannel getItemWithPromotionsChannel() {
-        return MessageChannels.direct().get();
-    }
-    @Bean
-    public MessageChannel getItemWithPromotionsByIdChannel() {
-        return MessageChannels.direct().get();
-    }
-    @Bean
-    public MessageChannel postItemChannel() {
-        return MessageChannels.direct().get();
-    }
-    @Bean
-    public MessageChannel putItemChannel() {
-        return MessageChannels.direct().get();
-    }
-    @Bean
-    public MessageChannel deleteItemChannel() {
-        return MessageChannels.direct().get();
-    }*/
-
     @Bean
     public MessageChannel replyItemChannel() {
         return new QueueChannel();
     }
 
-
-    /*@Bean
-    public IntegrationFlow handleGetItems() {
-        return IntegrationFlows.from("getItemChannel")
-                .handle((payload, headers) -> itemService.getAllItems())
-                .channel(replyItemChannel())
-                .get();
-    }
-
-    @Bean
-    public IntegrationFlow handleGetItemById() {
-        return IntegrationFlows.from("getItemByIdChannel")
-                .handle((payload, headers) -> itemService.getItemById((Long)payload))
-                .channel(replyItemChannel())
-                .get();
-    }
-
-    @Bean
-    public IntegrationFlow handleGetItemWithPromotions() {
-        return IntegrationFlows.from("getItemWithPromotionsChannel")
-                .handle((payload, headers) -> itemService.getAllItemsWithPromotions())
-                .channel(replyItemChannel())
-                .get();
-    }
-
-    @Bean
-    public IntegrationFlow handleGetItemWithPromotionsById() {
-        return IntegrationFlows.from("getItemWithPromotionsByIdChannel")
-                .handle((payload, headers) -> itemService.getItemWithPromotionsById((Long)payload))
-                .channel(replyItemChannel())
-                .get();
-    }
-
-    @Bean
-    public IntegrationFlow handlePostItem() {
-        return IntegrationFlows.from("postItemChannel")
-                .handle((payload, headers) -> {
-                    Item item = (Item)payload;
-                    return itemService.createItem(item);
-                })
-                .channel(replyItemChannel())
-                .get();
-    }
-
-    @Bean
-    public IntegrationFlow handlePutItem() {
-        return IntegrationFlows.from("putItemChannel")
-                .handle((payload, headers) -> {
-                    UpdateItemPayload updateItem = (UpdateItemPayload) payload;
-                    Optional<Item> item = itemService.getItemById(updateItem.getId());
-                    if (item.isPresent()) {
-                       return MessageBuilder.withPayload(itemService.updateItem(updateItem.getId(), updateItem.getItem())).build();
-                    } else {
-                        return MessageBuilder.withPayload(item).build();
-                    }
-                })
-                .channel(replyItemChannel())
-                .get();
-    }
-
-    @Bean
-    public IntegrationFlow handleDeleteItem() {
-        return IntegrationFlows.from("deleteItemChannel")
-                .handle((payload, headers) -> {
-                    Optional<Item> item = itemService.getItemById((Long) payload);
-                    if (item.isPresent()) {
-                        itemService.deleteItem((Long)payload);
-                        return MessageBuilder.withPayload("Item deleted successfully").build();
-                    } else {
-                        return MessageBuilder.withPayload(item).build();
-                    }
-
-                })
-                .channel(replyItemChannel())
-                .get();
-    }*/
-
-    //=======================================================================================
-    //Testing
     @Bean
     public MessageChannel itemChannel() {
         return MessageChannels.direct().get();

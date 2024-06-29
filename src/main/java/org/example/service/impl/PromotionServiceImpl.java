@@ -2,7 +2,6 @@ package org.example.service.impl;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.exception.AlreadyExistsException;
 import org.example.model.Promotion;
 import org.example.repository.PromotionRepository;
 import org.example.service.PromotionService;

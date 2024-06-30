@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.QueueChannel;
-import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.MessageChannels;
@@ -18,7 +17,6 @@ import org.springframework.messaging.MessageChannel;
 import java.util.Optional;
 
 @Configuration
-@EnableIntegration
 public class PromotionIntegrationConfig {
 
     @Autowired
@@ -40,14 +38,22 @@ public class PromotionIntegrationConfig {
                 .routeToRecipients(router -> router
                         .recipientFlow(payload -> payload instanceof PayloadWrapper &&
                                         ((PayloadWrapper) payload).getAction().equals("CREATE"),
-                                flow -> flow.handle(m -> {
-                                    PayloadWrapper payload = (PayloadWrapper) m.getPayload();
-                                    Promotion item = (Promotion)payload.getEntity();
-                                    promotionService.createPromotion(item);
-                                }))
+                                flow -> flow.handle((m,head) -> {
+
+                                    PayloadWrapper payload = (PayloadWrapper) m;
+                                    Promotion promo = (Promotion)payload.getEntity();
+                                    Optional<Promotion> promotion = promotionService.getPromotionByItemId(promo.getItemId());
+                                    if (promotion.isPresent()) {
+                                        return MessageBuilder.withPayload(Optional.empty()).build();
+                                    } else {
+                                        return MessageBuilder.withPayload(promotionService.createPromotion(promo)).build();
+                                    }
+
+                                }).channel(replyChannel()))
                         .recipientFlow(payload -> payload instanceof PayloadWrapper &&
                                         ((PayloadWrapper) payload).getAction().equals("UPDATE"),
                                 flow -> flow.handle((m,headers) -> {
+
                                     PayloadWrapper payload = (PayloadWrapper) m;
                                     UpdatePromoPayload updatePromoPayload = (UpdatePromoPayload)payload.getEntity();
                                     Optional<Promotion> promotion = promotionService.getPromotionById(updatePromoPayload.getId());
@@ -58,36 +64,43 @@ public class PromotionIntegrationConfig {
                                     } else {
                                         return MessageBuilder.withPayload(promotion).build();
                                     }
+
                                 }).channel(replyChannel()))
                         .recipientFlow(payload -> payload instanceof PayloadWrapper &&
                                         ((PayloadWrapper) payload).getAction().equals("GET"),
                                 flow -> flow.handle((m,headers) -> {
+
                                     return MessageBuilder.withPayload(promotionService.getAllPromotions()).build();
+
                                 }).channel(replyChannel()))
                         .recipientFlow(payload -> payload instanceof PayloadWrapper &&
                                         ((PayloadWrapper) payload).getAction().equals("GET_BY_ID"),
                                 flow -> flow.handle((m,headers) -> {
+
                                     return MessageBuilder.withPayload(promotionService.getPromotionById(((PayloadWrapper) m).getId())).build();
+
                                 }).channel(replyChannel()))
                         .recipientFlow(payload -> payload instanceof PayloadWrapper &&
                                         ((PayloadWrapper) payload).getAction().equals("GET_BY_ITEM_ID"),
                                 flow -> flow.handle((m,headers) -> {
+
                                     Long itemId = ((PayloadWrapper) m).getId();
                                     return MessageBuilder.withPayload(promotionService.getPromotionByItemId(itemId)
                                     ).build();
+
                                 }).channel(replyChannel()))
                         .recipientFlow(payload -> payload instanceof PayloadWrapper &&
                                         ((PayloadWrapper) payload).getAction().equals("DELETE"),
                                 flow -> flow.handle((m,headers) -> {
+
                                     PayloadWrapper payload = (PayloadWrapper) m;
                                     Long  id = payload.getId();
                                     Optional<Promotion> promotion = promotionService.getPromotionById(id);
                                     if (promotion.isPresent()) {
                                         promotionService.deletePromotion(id);
-                                        return MessageBuilder.withPayload("Promotion deleted successfully").build();
-                                    } else {
-                                        return MessageBuilder.withPayload(promotion).build();
                                     }
+                                    return MessageBuilder.withPayload(promotion).build();
+
                                 }).channel(replyChannel()))
                         .defaultOutputToParentFlow()
                 )

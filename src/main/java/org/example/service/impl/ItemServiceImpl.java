@@ -17,9 +17,12 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.aggregation.Fields;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -75,18 +78,6 @@ public class ItemServiceImpl implements ItemService {
         return resultList;
     }
 
-//    @Override
-//    public List<ItemPromoDto> getAllItemsWithPromotions() {
-//        String objectName = "Items";
-//        serviceLogger.info("[START] : >>> --- Transaction start for fetching " + objectName + " information's with promotions. ---");
-//        List<Item> items = itemRepository.findAll();
-//        List<ItemPromoDto> resultList =  items.stream()
-//                .map(Item -> new ItemPromoDto(Item, getPromotionsForItem(Item.getId())))
-//                .collect(Collectors.toList());
-//        serviceLogger.info("[FINISH] : >>> --- Transaction finished successfully for fetching " + objectName + " information's with promotions. ---");
-//        return resultList;
-//    }
-
     @Override
     public Optional<ItemPromoDto> getItemWithPromotionsById(Long id) {
         String objectName = "Item";
@@ -118,11 +109,22 @@ public class ItemServiceImpl implements ItemService {
         String objectName = "Item";
         serviceLogger.info("[START] : >>> --- Transaction start for updating " + objectName + " information's. ---");
 
-        item.setUpdatedAt(new Date());
-        itemRepository.save(item);
+        Item existingItem = itemRepository.findById(id).orElseThrow();
+
+        // Update only the fields that are not null or empty
+        updateIfNotNull(existingItem, item, Item::getName, i -> i.setName(item.getName()));
+        updateIfNotNull(existingItem, item, Item::getDuration, i -> i.setDuration(item.getDuration()));
+        updateIfNotNull(existingItem, item, Item::getDistance, i -> i.setDistance(item.getDistance()));
+        updateIfNotNull(existingItem, item, Item::getRating, i -> i.setRating(item.getRating()));
+        updateIfNotNull(existingItem, item, Item::getDeliveryFee, i -> i.setDeliveryFee(item.getDeliveryFee()));
+        updateIfNotNull(existingItem, item, Item::getCategories, i -> i.setCategories(item.getCategories()));
+        updateIfNotNull(existingItem, item, Item::getImageUrl, i -> i.setImageUrl(item.getImageUrl()));
+
+        existingItem.setUpdatedAt(new Date());
+        itemRepository.save(existingItem);
 
         serviceLogger.info("[FINISH] : >>> --- Transaction finished successfully for updating " + objectName + " information's. ---");
-        return item;
+        return existingItem;
 
     }
 
@@ -145,10 +147,26 @@ public class ItemServiceImpl implements ItemService {
                 .filter(promotion -> itemId.equals(promotion.getItemId()))
                 .collect(Collectors.toList());
 
-        serviceLogger.info("[FINISH] : >>> --- Transaction finished successfully for removing " + objectName + " information's. ---");
+        serviceLogger.info("[FINISH] : >>> --- Transaction finished successfully for fetching " + objectName + " information's. ---");
         return promotionList;
     }
 
-
-
+    private void updateIfNotNull(Item existingItem, Item item, Function<Item, ?> getter, Consumer<Item> setter) {
+        Object value = getter.apply(item);
+        if (value != null) {
+            if (value instanceof String) {
+                String stringValue = (String) value;
+                if (!stringValue.trim().isEmpty()) {
+                    setter.accept(existingItem);
+                }
+            } else if (value instanceof Collection) {
+                Collection<?> collectionValue = (Collection<?>) value;
+                if (!collectionValue.isEmpty()) {
+                    setter.accept(existingItem);
+                }
+            } else {
+                setter.accept(existingItem);
+            }
+        }
+    }
 }

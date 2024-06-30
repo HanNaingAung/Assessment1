@@ -11,9 +11,12 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Service
 public class  PromotionServiceImpl implements PromotionService {
@@ -71,11 +74,20 @@ public class  PromotionServiceImpl implements PromotionService {
         String objectName = "Promotion";
         serviceLogger.info("[START] : >>> --- Transaction start for updating " + objectName + " information's. ---");
 
-        promotion.setUpdatedAt(convertToDate(LocalDateTime.now()));
-        promotionRepository.save(promotion);
+        Promotion existingPromo = promotionRepository.findById(id).orElseThrow();
+
+        // Update only the fields that are not null or empty
+        updateIfNotNull(existingPromo, promotion, Promotion::getItemId, i -> i.setItemId(promotion.getItemId()));
+        updateIfNotNull(existingPromo, promotion, Promotion::getDescription, i -> i.setDescription(promotion.getDescription()));
+        updateIfNotNull(existingPromo, promotion, Promotion::getStartDate, i -> i.setStartDate(promotion.getStartDate()));
+        updateIfNotNull(existingPromo, promotion, Promotion::getEndDate, i -> i.setEndDate(promotion.getEndDate()));
+        updateIfNotNull(existingPromo, promotion, Promotion::getPromoteFrom, i -> i.setPromoteFrom(promotion.getPromoteFrom()));
+
+        existingPromo.setUpdatedAt(convertToDate(LocalDateTime.now()));
+        promotionRepository.save(existingPromo);
 
         serviceLogger.info("[FINISH] : >>> --- Transaction finished successfully for updating " + objectName + " information's. ---");
-        return promotion;
+        return existingPromo;
     }
 
     @Override
@@ -90,5 +102,24 @@ public class  PromotionServiceImpl implements PromotionService {
 
     private Date convertToDate(LocalDateTime dateToConvert) {
         return Date.from(dateToConvert.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private void updateIfNotNull(Promotion existingPromo, Promotion promo, Function<Promotion, ?> getter, Consumer<Promotion> setter) {
+        Object value = getter.apply(promo);
+        if (value != null) {
+            if (value instanceof String) {
+                String stringValue = (String) value;
+                if (!stringValue.trim().isEmpty()) {
+                    setter.accept(existingPromo);
+                }
+            } else if (value instanceof Collection) {
+                Collection<?> collectionValue = (Collection<?>) value;
+                if (!collectionValue.isEmpty()) {
+                    setter.accept(existingPromo);
+                }
+            } else {
+                setter.accept(existingPromo);
+            }
+        }
     }
 }

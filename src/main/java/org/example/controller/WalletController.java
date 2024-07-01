@@ -21,15 +21,6 @@ public class WalletController {
     @Autowired
     private MessagingTemplate messagingTemplate;
 
-   /* @PostMapping("/topup")
-    public ResponseEntity<?> topupWallet(@RequestBody TopupPayload requestPayload) {
-        Message<TopupPayload> message = MessageBuilder.withPayload(requestPayload).build();
-        messagingTemplate.setDefaultDestination(replyWalletChannel);
-        messagingTemplate.send(topupWalletChannel, message);
-        Message<?> reply = messagingTemplate.receive();
-        return ResponseEntity.ok(reply.getPayload());
-    }*/
-
     @PostMapping("/topup")
     public ResponseEntity<?> topupWallet() {
         Message<String> message = MessageBuilder.withPayload("").build();

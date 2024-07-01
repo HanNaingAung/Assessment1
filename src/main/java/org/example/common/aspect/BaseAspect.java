@@ -108,8 +108,6 @@ public class BaseAspect {
 		}
 	}
 
-//	@Getter
-//	@Setter
 	static class MethodMappingInfo {
 		private String methodMappingUrl;
 		private String requestMethod;

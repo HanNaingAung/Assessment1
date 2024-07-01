@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.example.model.Promotion;
-import org.example.service.PromotionService;
 
 @Getter
 @Setter

@@ -3,12 +3,15 @@ package org.example.controller;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.common.annotation.RestLoggable;
+import org.example.common.pagination.Pagination;
 import org.example.dto.ItemPromoDto;
+import org.example.dto.PageResponseDto;
 import org.example.exception.ResourceNotFoundException;
 import org.example.model.Item;
 import org.example.util.PayloadWrapper;
 import org.example.util.UpdateItemPayload;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.integration.core.MessagingTemplate;
 import org.springframework.integration.support.MessageBuilder;
@@ -41,6 +44,26 @@ public class ItemController {
         Optional<List> items = sendAndReceiveMessage("GET", null, null, List.class);
         applicationLogger.info("Response sent with {} items.", items.get().size());
         return ResponseEntity.ok(items);
+    }
+
+    @GetMapping("/paging")
+    public ResponseEntity<?> getAllItemsWithPagination(@RequestParam(defaultValue = "1") int page,
+                                                       @RequestParam(defaultValue = "10") int pageSize) {
+        applicationLogger.info("Request received to get all items based on pagination.");
+        Pagination pagination = new Pagination();
+        pagination.setPageNum(page);
+        pagination.setPageSize(pageSize);
+        Optional<Page> items = sendAndReceiveMessage("GET_WITH_PAGINATION", pagination, null, Page.class);
+
+        Page paging = items.get();
+        PageResponseDto<Item> response = new PageResponseDto<>();
+        response.setPageNumber(paging.getTotalPages());
+        response.setPageSize(paging.getSize());
+        response.setData(paging.getContent());
+        response.setTotalCount(paging.getTotalElements());
+
+        applicationLogger.info("Page " + (page) + " of " + paging.getTotalPages() + " containing " + paging.getTotalElements() + " instances");
+        return ResponseEntity.ok(paging);
     }
 
     @GetMapping("/{id}")

@@ -1,5 +1,6 @@
 package org.example.config;
 
+import org.example.common.pagination.Pagination;
 import org.example.model.Item;
 import org.example.service.ItemService;
 import org.example.util.PayloadWrapper;
@@ -7,6 +8,8 @@ import org.example.util.UpdateItemPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.integration.channel.QueueChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
@@ -66,6 +69,15 @@ public class ItemIntegrationConfig {
                                 flow -> flow.handle((m,headers) -> {
 
                                      return MessageBuilder.withPayload(itemService.getAllItems()).build();
+
+                                }).channel(replyItemChannel()))
+                        .recipientFlow(payload -> payload instanceof PayloadWrapper &&
+                                        ((PayloadWrapper) payload).getAction().equals("GET_WITH_PAGINATION"),
+                                flow -> flow.handle((m,headers) -> {
+                                    PayloadWrapper payload = (PayloadWrapper) m;
+                                    Pagination pagination = (Pagination) payload.getEntity();
+                                    Pageable pageable = PageRequest.of(pagination.getPageNum() - 1, pagination.getPageSize());
+                                    return MessageBuilder.withPayload(itemService.getAllItemsWithPagination(pageable)).build();
 
                                 }).channel(replyItemChannel()))
                         .recipientFlow(payload -> payload instanceof PayloadWrapper &&

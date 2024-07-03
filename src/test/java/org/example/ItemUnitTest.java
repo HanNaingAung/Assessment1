@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.model.Item;
 import org.example.repository.ItemRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.testng.Assert;
 import org.testng.annotations.Test;;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +30,21 @@ public class ItemUnitTest extends BaseUnitTest {
         List<Item> results = repository.findAll();
         assertTrue(results.size() > 0, "Records should not be empty.");
         showEntriesOfCollection(results);
+    }
+
+    @Test(groups = {"fetch"})
+    public void testSelectAllWithPagination()  {
+        int pageNumber = 1;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber-1,pageSize);
+        Page<Item> page =  repository.findAll(pageable);
+        List<Item> results = page.getContent();
+        if (results.isEmpty()) {
+            testLogger.info("Records should not be empty. ==> " + results+ page);
+        } else {
+            testLogger.info("Page " + (pageNumber) + " of " + page.getTotalPages() + " containing " + page.getTotalElements() + " instances");
+            showEntriesOfCollection(results);
+        }
     }
 
     @Test(groups = {"fetch"})
@@ -68,7 +86,6 @@ public class ItemUnitTest extends BaseUnitTest {
         List<Item> ItemList = new ArrayList<>();
 
         Item record = new Item();
-        record.setId(1L);
         record.setId(1L);
         record.setName("Coca Cola");
         record.setDuration(30);

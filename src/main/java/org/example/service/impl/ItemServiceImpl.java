@@ -11,6 +11,8 @@ import org.example.service.ItemService;
 import org.example.service.PromotionService;
 import org.example.service.SequenceGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -47,6 +49,15 @@ public class ItemServiceImpl implements ItemService {
         String objectName = "Items";
         serviceLogger.info("[START] : >>> --- Transaction start for fetching " + objectName + " information's.  ---");
         List<Item> resultList = itemRepository.findAll();
+        serviceLogger.info("[FINISH] : >>> --- Transaction finished successfully for fetching " + objectName + " information's. ---");
+        return resultList;
+    }
+
+    @Override
+    public Page<Item> getAllItemsWithPagination(Pageable pageable) {
+        String objectName = "Items";
+        serviceLogger.info("[START] : >>> --- Transaction start for fetching " + objectName + " information's with pagination.  ---");
+        Page<Item> resultList = itemRepository.findAll(pageable);
         serviceLogger.info("[FINISH] : >>> --- Transaction finished successfully for fetching " + objectName + " information's. ---");
         return resultList;
     }

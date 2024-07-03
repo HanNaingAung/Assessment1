@@ -4,6 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.example.model.Promotion;
 import org.example.repository.PromotionRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.testng.Assert;
 import org.testng.annotations.Test;;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +26,25 @@ public class PromotionUnitTest extends BaseUnitTest {
     private PromotionRepository repository;
 
     @Test(groups = {"fetch"})
-    public void testSelectAll() throws Exception {
+    public void testSelectAll() {
         List<Promotion> results = repository.findAll();
         assertTrue(results.size() > 0, "Records should not be empty.");
         showEntriesOfCollection(results);
+    }
+
+    @Test(groups = {"fetch"})
+    public void testSelectAllWithPagination()  {
+        int pageNumber = 1;
+        int pageSize = 10;
+        Pageable pageable = PageRequest.of(pageNumber-1,pageSize);
+        Page<Promotion> page =  repository.findAll(pageable);
+        List<Promotion> results = page.getContent();
+        if (results.isEmpty()) {
+            testLogger.info("Records should not be empty. ==> " + results+ page);
+        } else {
+            testLogger.info("Page " + (pageNumber) + " of " + page.getTotalPages() + " containing " + page.getTotalElements() + " instances");
+            showEntriesOfCollection(results);
+        }
     }
 
     @Test(groups = {"fetch"})
